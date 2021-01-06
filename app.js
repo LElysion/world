@@ -1,6 +1,7 @@
 const SKILL = require('./skill');
 const TOOL = require('./tool');
-const ACTION_HANDLER = require('./action')
+const ACTION = require('./action');
+const BUFF = require('./buff')
 
 let unit1 = {
   name: 'A',
@@ -10,10 +11,12 @@ let unit1 = {
   def: 5,
   spd: 10,
   type: function() {
-    return ['ATTACK', 'DOUBLE_ATTACK', 'HEMOPHAGIA', 'FIGHTING_AND_BREVE'][TOOL.RandomNumBoth(3)]
+    return ['ATTACK', 'DOUBLE_ATTACK', 'HEMOPHAGIA', 'FIGHTING_AND_BREVE', 'HEAVY_ATTACK'][TOOL.RandomNumBoth(3)]
   },
   id: 1,
-  target: 2
+  target: 2,
+  action: true,
+  buffs: []
 };
 let unit2 = {
   name: 'B',
@@ -23,10 +26,12 @@ let unit2 = {
   def: 5,
   spd: 10,
   type: function() {
-    return ['ATTACK', 'DOUBLE_ATTACK', 'HEMOPHAGIA', 'FIGHTING_AND_BREVE'][TOOL.RandomNumBoth(3)]
+    return ['ATTACK', 'DOUBLE_ATTACK', 'HEMOPHAGIA', 'FIGHTING_AND_BREVE', 'HEAVY_ATTACK'][TOOL.RandomNumBoth(3)]
   },
   id: 2,
-  target: 1
+  target: 1,
+  action: true,
+  buffs: []
 };
 
 let win = false;
@@ -51,8 +56,8 @@ function round() {
 
   let logs = [];
 
-  let actions = TOOL.obj2arr(units).map(item => {
-    return ACTION_HANDLER.createAction(item, units[item.target], item.type);
+  let actions = ACTION.orderAction(TOOL.obj2arr(units)).map(item => {
+    return ACTION.createAction(item, units[item.target], item.type);
   })
 
   const handleAction = (action) => {
@@ -65,11 +70,46 @@ function round() {
       'TARGET':  target
     }
 
-    results = SKILL[action.type].handler(curUnit, target);
-    results.forEach((result) => {
-      unitsAlias[result.effectTarget][result.effectProp] += (result.effectValue * (result.positive ? 1 : -1));
-      logs.push(result.log);
+    curUnit.action =  true;
+
+    // 状态处理
+    curUnit.buffs.forEach(buff => {
+      let results = BUFF[buff.code].handler(curUnit, target);
+      results.forEach(result => {
+        typeof result.effectValue === 'boolean' 
+          ? unitsAlias[result.effectTarget][result.effectProp] = result.effectValue
+          : unitsAlias[result.effectTarget][result.effectProp] += (result.effectValue * (result.positive ? 1 : -1));
+      })
     })
+
+    if(!!curUnit.action) {
+      // 操作指令
+      results = SKILL[action.type].handler(curUnit, target);
+      results.forEach((result) => {
+        let { effectProp } = result;
+        if(effectProp === 'buffs') {
+          let pro = TOOL.RandomNumBoth(100);
+          if(pro <= result.probability) {
+            unitsAlias[result.effectTarget][result.effectProp].push(result.buff);
+            logs.push(result.log)
+          }
+        } else {
+          unitsAlias[result.effectTarget][result.effectProp] += (result.effectValue * (result.positive ? 1 : -1));
+          logs.push(result.log);
+        }
+      })
+    } else {
+      logs.push(`${curUnit.name}无法行动`)
+    }
+
+    let buffcount = curUnit.buffs.length;
+    while(buffcount--) {
+      curUnit.buffs[buffcount].continued--;
+      if(curUnit.buffs[buffcount].continued <= 0) {
+        curUnit.buffs.splice(buffcount, 1);
+      }
+    }
+
     
     if (target.hp <= 0) {
       logs.push(`${curUnit.name}击败了${target.name}`, JSON.stringify(unit1), JSON.stringify(unit2));
