@@ -9,7 +9,7 @@ let unit1 = {
   def: 5,
   spd: 10,
   type: function() {
-    return ['ATTACK', 'DOUBLE_ATTACK', 'HEMOPHAGIA', 'FIGHTING_AND_BREVE', 'HEAVY_ATTACK'][TOOL.RandomNumBoth(4)]
+    return ['ATTACK', 'DOUBLE_ATTACK', 'HEMOPHAGIA', 'FIGHTING_AND_BREVE', 'HEAVY_ATTACK', 'SUPER_COMBO'][TOOL.RandomNumBoth(5)]
   },
   id: 1,
   target: 2,
@@ -24,7 +24,7 @@ let unit2 = {
   def: 5,
   spd: 11,
   type: function() {
-    return ['ATTACK', 'DOUBLE_ATTACK', 'HEMOPHAGIA', 'FIGHTING_AND_BREVE', 'HEAVY_ATTACK'][TOOL.RandomNumBoth(4)]
+    return ['ATTACK', 'DOUBLE_ATTACK', 'HEMOPHAGIA', 'FIGHTING_AND_BREVE', 'HEAVY_ATTACK', 'SUPER_COMBO'][TOOL.RandomNumBoth(5)]
   },
   id: 2,
   target: 1,

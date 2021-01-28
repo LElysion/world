@@ -22,7 +22,7 @@ function orderAction(units) {
 }
 
 
-const handleAction = (action, status) => {
+function handleAction(action, status) {
   if (status.win) return '战斗已结束，行动终止';
   let { curUnit, target } = action;
   let results = null;

@@ -127,7 +127,37 @@ const SKILL = {
     handler: function (curUnit, target) {
       return handleEffects(curUnit, target, this.effects)
     }
-  }
+  },
+  'SUPER_COMBO': {
+    name: '超级连击',
+    effects: [
+      {
+        prop: 'hp', baseValue: 0, continued: 0, positive: false, effectTarget: 'TARGET',
+        getEffectValue: function (curUnit, target) {
+          return (lowestDamage(curUnit.atk - target.def, curUnit.atk) * 4);
+        },
+        getLog: function (curUnit, target) {
+          return `${curUnit.name}使用超级连击后攻击${target.name}，造成${this.getEffectValue(curUnit, target)}点伤害`;
+        }
+      },
+      {
+        prop: 'buffs', baseValue: 0, continued: 2, positive: false, effectTarget: 'SELF', probability: 100,
+        getBuff: function (curUnit, target) {
+          return {
+            code: 'VERTIGO',
+            continued: this.continued
+          };
+        },
+        getLog: function (curUnit, target) {
+          return `${curUnit.name}使用超级连击后眩晕了自己`;
+        }
+      },
+    ],
+    handler: function (curUnit, target) {
+      return handleEffects(curUnit, target, this.effects)
+    }
+  },
+
 }
 
 function handleEffects(curUnit, target, effects) {
