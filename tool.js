@@ -10,6 +10,14 @@ function RandomNumBoth(max, min = 0) {
   return Math.round(Math.random() * (max - min)) + min;
 }
 
+
+
+
+
+
+
+
+
 module.exports = {
   obj2arr, RandomNumBoth
 };
